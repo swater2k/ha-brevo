@@ -128,8 +128,8 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "hardBounces": "Hard bounce",
-              "softBounces": "Soft bounce",
+              "hard_bounce": "Hard bounce",
+              "soft_bounce": "Soft bounce",
               "blocked": "Blocked",
               "spam": "Spam report",
               "invalid": "Invalid address",

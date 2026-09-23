@@ -13,7 +13,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import BrevoAuthError, BrevoClient, BrevoError, BrevoSnapshot, EmailEvent
-from .const import DOMAIN, PROBLEM_EVENTS
+from .const import DOMAIN, PROBLEM_EVENT_MAP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,12 +79,12 @@ class BrevoCoordinator(DataUpdateCoordinator[BrevoData]):
             "delivery_rate_7d": week.delivery_rate,
         }
 
-        problems = [e for e in snapshot.events if e.event in PROBLEM_EVENTS]
+        problems = [e for e in snapshot.events if e.event in PROBLEM_EVENT_MAP]
         latest = problems[0] if problems else None
         values["last_problem"] = _parse(latest.date) if latest else None
         values["last_problem_details"] = (
             {
-                "event": latest.event,
+                "event": PROBLEM_EVENT_MAP[latest.event],
                 "email": latest.email,
                 "subject": latest.subject,
                 "reason": latest.reason,

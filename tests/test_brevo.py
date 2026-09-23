@@ -46,6 +46,7 @@ async def test_entities(hass: HomeAssistant, mock_brevo, config_entry) -> None:
 
     problem = hass.states.get("sensor.brevo_last_delivery_problem")
     assert problem.state.startswith("2026-09-17T19:14")  # in UTC umgerechnet
+    assert problem.attributes["event"] == "hard_bounce"  # aus hardBounces übersetzt
     assert problem.attributes["reason"] == "unknown user"
     assert problem.attributes["email"] == "bounce@example.com"
 
@@ -89,7 +90,7 @@ async def test_new_problem_fires_event(hass: HomeAssistant, mock_brevo, config_e
     await config_entry.runtime_data.coordinator.async_refresh()
     await hass.async_block_till_done()
 
-    assert [e["event_type"] for e in seen] == ["blocked"]
+    assert [e["event_type"] for e in seen] == ["blocked"]  # Brevo-Name in HA-Typ übersetzt
     assert seen[0]["email"] == "neu@example.com"
     assert seen[0]["reason"] == "blocked contact"
 

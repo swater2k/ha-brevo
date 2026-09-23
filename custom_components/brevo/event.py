@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import BrevoConfigEntry
-from .const import PROBLEM_EVENTS
+from .const import EVENT_TYPES, PROBLEM_EVENT_MAP
 from .coordinator import BrevoCoordinator
 from .entity import BrevoEntity
 
@@ -33,7 +33,7 @@ class BrevoDeliveryEvent(BrevoEntity, EventEntity):
 
     def __init__(self, coordinator: BrevoCoordinator, entry: BrevoConfigEntry) -> None:
         super().__init__(coordinator, entry, "delivery_event")
-        self._attr_event_types = list(PROBLEM_EVENTS)
+        self._attr_event_types = list(EVENT_TYPES)
 
     @property
     def available(self) -> bool:
@@ -44,7 +44,7 @@ class BrevoDeliveryEvent(BrevoEntity, EventEntity):
         if self.coordinator.data is not None:
             for event in self.coordinator.data.new_problems:
                 self._trigger_event(
-                    event.event,
+                    PROBLEM_EVENT_MAP.get(event.event, "error"),
                     {
                         "email": event.email,
                         "subject": event.subject,

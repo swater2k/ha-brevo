@@ -80,8 +80,8 @@ The event entity fires once per new problem event since the last poll.
 
 | Event type | Meaning |
 |---|---|
-| `hardBounces` | Permanently rejected, e.g. the address does not exist |
-| `softBounces` | Temporarily rejected, e.g. mailbox full |
+| `hard_bounce` | Permanently rejected, e.g. the address does not exist |
+| `soft_bounce` | Temporarily rejected, e.g. mailbox full |
 | `blocked` | Recipient is on the blocked list, often after an earlier hard bounce |
 | `spam` | Recipient marked the mail as spam |
 | `invalid` | Address is not valid |
@@ -100,7 +100,7 @@ automation:
         target:
           entity_id: event.brevo_delivery_event
         options:
-          event_type: [hardBounces, blocked, spam]
+          event_type: [hard_bounce, blocked, spam]
     actions:
       - action: notify.mobile_app_your_phone
         data:
