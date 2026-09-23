@@ -1,0 +1,154 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Brevo",
+        "description": "Connect your Brevo account with an API key v3.",
+        "data": {
+          "api_key": "API key"
+        },
+        "data_description": {
+          "api_key": "Create it in Brevo under SMTP & API → API keys. Read access is enough."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Brevo",
+        "description": "The stored API key was rejected. Enter a valid one.",
+        "data": {
+          "api_key": "API key"
+        },
+        "data_description": {
+          "api_key": "Create it in Brevo under SMTP & API → API keys. Read access is enough."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "API key rejected by Brevo.",
+      "cannot_connect": "Brevo is not reachable.",
+      "unknown_response": "Unexpected answer from the Brevo API.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This Brevo account is already configured.",
+      "reauth_successful": "API key updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Brevo options",
+        "data": {
+          "scan_interval": "Polling interval",
+          "credits_threshold": "Warn below credits"
+        },
+        "data_description": {
+          "scan_interval": "In minutes. Brevo data changes slowly, so 15 minutes is plenty.",
+          "credits_threshold": "Creates a repair issue when fewer e-mail credits are left."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "email_credits": {
+        "name": "E-mail credits"
+      },
+      "sms_credits": {
+        "name": "SMS credits"
+      },
+      "requests_24h": {
+        "name": "E-mails sent (24 h)"
+      },
+      "delivered_24h": {
+        "name": "Delivered (24 h)"
+      },
+      "delivery_rate_24h": {
+        "name": "Delivery rate (24 h)"
+      },
+      "problems_24h": {
+        "name": "Delivery problems (24 h)"
+      },
+      "hard_bounces_24h": {
+        "name": "Hard bounces (24 h)"
+      },
+      "soft_bounces_24h": {
+        "name": "Soft bounces (24 h)"
+      },
+      "blocked_24h": {
+        "name": "Blocked (24 h)"
+      },
+      "spam_reports_24h": {
+        "name": "Spam reports (24 h)"
+      },
+      "invalid_24h": {
+        "name": "Invalid addresses (24 h)"
+      },
+      "unsubscribed_24h": {
+        "name": "Unsubscribes (24 h)"
+      },
+      "opens_24h": {
+        "name": "Opens (24 h)"
+      },
+      "clicks_24h": {
+        "name": "Clicks (24 h)"
+      },
+      "requests_7d": {
+        "name": "E-mails sent (7 days)"
+      },
+      "problems_7d": {
+        "name": "Delivery problems (7 days)"
+      },
+      "delivery_rate_7d": {
+        "name": "Delivery rate (7 days)"
+      },
+      "last_problem": {
+        "name": "Last delivery problem"
+      },
+      "plan_type": {
+        "name": "Plan"
+      },
+      "relay_host": {
+        "name": "SMTP relay"
+      }
+    },
+    "binary_sensor": {
+      "api_reachable": {
+        "name": "API reachable"
+      },
+      "delivery_problem": {
+        "name": "Delivery problem"
+      },
+      "relay_enabled": {
+        "name": "SMTP relay active"
+      }
+    },
+    "event": {
+      "delivery": {
+        "name": "Delivery event",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "hardBounces": "Hard bounce",
+              "softBounces": "Soft bounce",
+              "blocked": "Blocked",
+              "spam": "Spam report",
+              "invalid": "Invalid address",
+              "deferred": "Deferred",
+              "error": "Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "issues": {
+    "credits_low": {
+      "title": "Brevo e-mail credits running low",
+      "description": "**{title}** has **{credits}** e-mail credits left, below your threshold of {threshold}.\\n\\nOnce the credits are used up, transactional mails are no longer delivered. Top up the account or raise the threshold in the integration options."
+    },
+    "delivery_problems": {
+      "title": "Brevo could not deliver e-mails",
+      "description": "**{title}** reported **{problems}** delivery problems in the last 24 hours, including hard bounces or blocked recipients.\\n\\nCheck the recipient addresses and the blocked contacts list in Brevo. Hard bounces stay blocked until you remove them."
+    }
+  }
+}

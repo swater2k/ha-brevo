@@ -1,0 +1,154 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Brevo",
+        "description": "Brevo-Konto mit einem API-Schlüssel v3 verbinden.",
+        "data": {
+          "api_key": "API-Schlüssel"
+        },
+        "data_description": {
+          "api_key": "In Brevo unter SMTP & API → API-Schlüssel erstellen. Lesezugriff genügt."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Brevo",
+        "description": "Der hinterlegte API-Schlüssel wurde abgelehnt. Bitte einen gültigen eingeben.",
+        "data": {
+          "api_key": "API-Schlüssel"
+        },
+        "data_description": {
+          "api_key": "In Brevo unter SMTP & API → API-Schlüssel erstellen. Lesezugriff genügt."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "API-Schlüssel von Brevo abgelehnt.",
+      "cannot_connect": "Brevo ist nicht erreichbar.",
+      "unknown_response": "Unerwartete Antwort der Brevo-API.",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Dieses Brevo-Konto ist bereits eingerichtet.",
+      "reauth_successful": "API-Schlüssel aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Brevo-Optionen",
+        "data": {
+          "scan_interval": "Abfrageintervall",
+          "credits_threshold": "Warnen unter Guthaben"
+        },
+        "data_description": {
+          "scan_interval": "In Minuten. Die Daten ändern sich langsam, 15 Minuten reichen.",
+          "credits_threshold": "Legt einen Reparatur-Hinweis an, wenn weniger E-Mail-Guthaben übrig ist."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "email_credits": {
+        "name": "E-Mail-Guthaben"
+      },
+      "sms_credits": {
+        "name": "SMS-Guthaben"
+      },
+      "requests_24h": {
+        "name": "Gesendete E-Mails (24 h)"
+      },
+      "delivered_24h": {
+        "name": "Zugestellt (24 h)"
+      },
+      "delivery_rate_24h": {
+        "name": "Zustellrate (24 h)"
+      },
+      "problems_24h": {
+        "name": "Zustellprobleme (24 h)"
+      },
+      "hard_bounces_24h": {
+        "name": "Hard Bounces (24 h)"
+      },
+      "soft_bounces_24h": {
+        "name": "Soft Bounces (24 h)"
+      },
+      "blocked_24h": {
+        "name": "Blockiert (24 h)"
+      },
+      "spam_reports_24h": {
+        "name": "Spam-Meldungen (24 h)"
+      },
+      "invalid_24h": {
+        "name": "Ungültige Adressen (24 h)"
+      },
+      "unsubscribed_24h": {
+        "name": "Abmeldungen (24 h)"
+      },
+      "opens_24h": {
+        "name": "Öffnungen (24 h)"
+      },
+      "clicks_24h": {
+        "name": "Klicks (24 h)"
+      },
+      "requests_7d": {
+        "name": "Gesendete E-Mails (7 Tage)"
+      },
+      "problems_7d": {
+        "name": "Zustellprobleme (7 Tage)"
+      },
+      "delivery_rate_7d": {
+        "name": "Zustellrate (7 Tage)"
+      },
+      "last_problem": {
+        "name": "Letztes Zustellproblem"
+      },
+      "plan_type": {
+        "name": "Tarif"
+      },
+      "relay_host": {
+        "name": "SMTP-Relay"
+      }
+    },
+    "binary_sensor": {
+      "api_reachable": {
+        "name": "API erreichbar"
+      },
+      "delivery_problem": {
+        "name": "Zustellproblem"
+      },
+      "relay_enabled": {
+        "name": "SMTP-Relay aktiv"
+      }
+    },
+    "event": {
+      "delivery": {
+        "name": "Zustellereignis",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "hardBounces": "Hard Bounce",
+              "softBounces": "Soft Bounce",
+              "blocked": "Blockiert",
+              "spam": "Spam-Meldung",
+              "invalid": "Ungültige Adresse",
+              "deferred": "Zurückgestellt",
+              "error": "Fehler"
+            }
+          }
+        }
+      }
+    }
+  },
+  "issues": {
+    "credits_low": {
+      "title": "Brevo-E-Mail-Guthaben wird knapp",
+      "description": "**{title}** hat noch **{credits}** E-Mail-Guthaben, unterhalb deiner Schwelle von {threshold}.\\n\\nIst das Guthaben aufgebraucht, werden keine transaktionalen Mails mehr zugestellt. Lade das Konto auf oder hebe die Schwelle in den Optionen an."
+    },
+    "delivery_problems": {
+      "title": "Brevo konnte E-Mails nicht zustellen",
+      "description": "**{title}** meldet **{problems}** Zustellprobleme in den letzten 24 Stunden, darunter Hard Bounces oder blockierte Empfänger.\\n\\nPrüfe die Empfängeradressen und die Liste blockierter Kontakte in Brevo. Hard Bounces bleiben gesperrt, bis du sie entfernst."
+    }
+  }
+}
