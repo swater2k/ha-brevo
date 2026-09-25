@@ -12,7 +12,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import BrevoAuthError, BrevoClient, BrevoError, BrevoSnapshot, EmailEvent
+from .api import (
+    BrevoAuthError,
+    BrevoClient,
+    BrevoError,
+    BrevoIpNotAuthorizedError,
+    BrevoSnapshot,
+    EmailEvent,
+)
 from .const import DOMAIN, PROBLEM_EVENT_MAP
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,14 +48,22 @@ class BrevoCoordinator(DataUpdateCoordinator[BrevoData]):
         )
         self.client = client
         self._seen: set[str] | None = None
+        # Gesetzt, solange Brevo die öffentliche IP blockiert. Bewusst kein
+        # Reauth: Der Schlüssel stimmt, und Home Assistant würde sonst das
+        # Abfragen einstellen, bis jemand einen neuen Schlüssel einträgt.
+        self.ip_block: str | None = None
 
     async def _async_update_data(self) -> BrevoData:
         try:
             snapshot = await self.client.snapshot()
+        except BrevoIpNotAuthorizedError as err:
+            self.ip_block = str(err) or "IP not authorized"
+            raise UpdateFailed(f"Brevo blockiert die öffentliche IP: {err}") from err
         except BrevoAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except BrevoError as err:
             raise UpdateFailed(str(err)) from err
+        self.ip_block = None
         return self._process(snapshot)
 
     def _process(self, snapshot: BrevoSnapshot) -> BrevoData:

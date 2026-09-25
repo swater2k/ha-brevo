@@ -117,6 +117,7 @@ automation:
 |---|---|
 | E-mail credits running low | Fewer credits left than the configured threshold |
 | Brevo could not deliver e-mails | Hard bounces or blocked recipients in the last 24 hours |
+| Brevo blocks your public IP address | Brevo's IP protection rejects the requests, usually after your connection got a new IP |
 
 Both disappear on their own once the cause is gone.
 
@@ -136,6 +137,7 @@ Both disappear on their own once the cause is gone.
 ## Troubleshooting
 
 - **"API key rejected by Brevo"**: the key was deleted or copied incompletely. Generate a new one and re-authenticate.
+- **"Brevo blocks your public IP address"**: Brevo's IP protection is active and your connection's public IP changed. The key is still valid. Authorize the address under **Settings → Security → Authorized IPs** in Brevo, or confirm Brevo's verification e-mail. The integration keeps retrying and recovers on its own. On connections with changing IPs, consider turning the IP protection off for the account.
 - **Credits sensor is empty**: the account has no plan with e-mail credits, e.g. some pay-as-you-go setups.
 - **No events**: `/smtp/statistics/events` only returns the last 24 hours by default, and only if mails were actually sent.
 - **Diagnostics**: Settings → Devices & services → Brevo → ⋮ → Download diagnostics. The API key and the recipient address are redacted.

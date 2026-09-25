@@ -26,7 +26,8 @@
       "invalid_auth": "API-Schlüssel von Brevo abgelehnt.",
       "cannot_connect": "Brevo ist nicht erreichbar.",
       "unknown_response": "Unerwartete Antwort der Brevo-API.",
-      "unknown": "Unerwarteter Fehler"
+      "unknown": "Unerwarteter Fehler",
+      "ip_not_authorized": "Brevo blockiert die öffentliche IP-Adresse deines Home Assistant. Gib sie in Brevo unter Einstellungen → Sicherheit → Autorisierte IPs frei oder bestätige die Verifizierungsmail von Brevo."
     },
     "abort": {
       "already_configured": "Dieses Brevo-Konto ist bereits eingerichtet.",
@@ -149,6 +150,10 @@
     "delivery_problems": {
       "title": "Brevo konnte E-Mails nicht zustellen",
       "description": "**{title}** meldet **{problems}** Zustellprobleme in den letzten 24 Stunden, darunter Hard Bounces oder blockierte Empfänger.\\n\\nPrüfe die Empfängeradressen und die Liste blockierter Kontakte in Brevo. Hard Bounces bleiben gesperrt, bis du sie entfernst."
+    },
+    "ip_not_authorized": {
+      "title": "Brevo blockiert deine öffentliche IP-Adresse",
+      "description": "Brevo lehnt jede Anfrage von **{title}** ab, weil die öffentliche IP-Adresse nicht freigegeben ist. Das passiert meist, nachdem dein Internetanschluss eine neue IP-Adresse bekommen hat.\n\nDer API-Schlüssel ist weiterhin gültig, eine erneute Anmeldung ist nicht nötig. Öffne in Brevo **Einstellungen → Sicherheit → Autorisierte IPs** und gib die aktuelle Adresse frei, oder bestätige die Verifizierungsmail von Brevo. Die Integration fängt sich danach von selbst.\n\nWechselt dein Anbieter die IP regelmäßig, kannst du die IP-Sperre für das Konto an derselben Stelle deaktivieren.\n\nBrevo meldet: `{message}`"
     }
   }
 }

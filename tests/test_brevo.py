@@ -192,3 +192,69 @@ async def test_options_and_diagnostics(hass: HomeAssistant, mock_brevo, config_e
     diag = await async_get_config_entry_diagnostics(hass, config_entry)
     assert diag["entry"]["data"]["api_key"] == "**REDACTED**"
     assert "bounce@example.com" not in str(diag)
+
+
+IP_BLOCK = {
+    "code": "unauthorized",
+    "message": "We have detected you are using an unrecognised IP address 203.0.113.9. "
+    "If you performed this action make sure to add the new IP address.",
+}
+
+
+async def test_ip_block_is_not_reauth(hass: HomeAssistant, aioclient_mock, config_entry) -> None:
+    """Neue öffentliche IP: kein Reauth, sondern Wiederholen plus Hinweis."""
+    aioclient_mock.get(f"{API}/account", status=401, json=IP_BLOCK)
+    aioclient_mock.get(f"{API}/smtp/statistics/aggregatedReport", status=401, json=IP_BLOCK)
+    aioclient_mock.get(f"{API}/smtp/statistics/events", status=401, json=IP_BLOCK)
+    config_entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert config_entry.state is ConfigEntryState.SETUP_RETRY
+    assert not [
+        f for f in hass.config_entries.flow.async_progress() if f["context"]["source"] == "reauth"
+    ]
+    issue = ir.async_get(hass).async_get_issue(
+        DOMAIN, f"ip_not_authorized_{config_entry.entry_id}"
+    )
+    assert issue is not None and issue.severity is ir.IssueSeverity.ERROR
+    assert "203.0.113.9" in issue.translation_placeholders["message"]
+
+    # IP freigegeben -> nächster Versuch klappt, Hinweis verschwindet
+    aioclient_mock.clear_requests()
+    aioclient_mock.get(f"{API}/account", json=ACCOUNT)
+    aioclient_mock.get(f"{API}/smtp/statistics/aggregatedReport", json=REPORT_24H)
+    aioclient_mock.get(f"{API}/smtp/statistics/events", json=EVENTS)
+    await hass.config_entries.async_reload(config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert config_entry.state is ConfigEntryState.LOADED
+    assert ir.async_get(hass).async_get_issue(
+        DOMAIN, f"ip_not_authorized_{config_entry.entry_id}"
+    ) is None
+
+
+async def test_ip_block_during_operation(hass: HomeAssistant, mock_brevo, config_entry) -> None:
+    await _setup(hass, config_entry)
+    mock_brevo.clear_requests()
+    mock_brevo.get(f"{API}/account", status=401, json=IP_BLOCK)
+    mock_brevo.get(f"{API}/smtp/statistics/aggregatedReport", status=401, json=IP_BLOCK)
+    mock_brevo.get(f"{API}/smtp/statistics/events", status=401, json=IP_BLOCK)
+
+    await config_entry.runtime_data.coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    assert config_entry.state is ConfigEntryState.LOADED  # läuft weiter und versucht es erneut
+    assert hass.states.get("binary_sensor.brevo_api_reachable").state == "off"
+    assert ir.async_get(hass).async_get_issue(
+        DOMAIN, f"ip_not_authorized_{config_entry.entry_id}"
+    ) is not None
+
+
+async def test_config_flow_ip_block(hass: HomeAssistant, aioclient_mock) -> None:
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    aioclient_mock.get(f"{API}/account", status=401, json=IP_BLOCK)
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"api_key": API_KEY})
+    assert result["errors"] == {"base": "ip_not_authorized"}

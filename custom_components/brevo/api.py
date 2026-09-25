@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
+import json
 from typing import Any
 
 import aiohttp
@@ -30,6 +31,15 @@ class BrevoConnectionError(BrevoError):
 
 class BrevoAuthError(BrevoError):
     """API-Schlüssel fehlt, ist ungültig oder hat zu wenig Rechte."""
+
+
+class BrevoIpNotAuthorizedError(BrevoError):
+    """Brevo blockiert die öffentliche IP (Sicherheitsfunktion "Authorized IPs").
+
+    Der Schlüssel ist gültig – ein neuer Schlüssel hilft deshalb nicht.
+    Tritt typischerweise auf, wenn sich die öffentliche IP des Anschlusses
+    ändert, etwa nach einer Zwangstrennung oder einem Router-Neustart.
+    """
 
 
 class BrevoRateLimitError(BrevoError):
@@ -152,6 +162,35 @@ class BrevoSnapshot:
     events: list[EmailEvent] = field(default_factory=list)
 
 
+_IP_BLOCK_MARKERS = (
+    "ip address",
+    "ip not authorized",
+    "not verified",
+    "unrecognised ip",
+    "unrecognized ip",
+)
+
+
+def _is_ip_block(message: str) -> bool:
+    text = message.lower()
+    return any(marker in text for marker in _IP_BLOCK_MARKERS)
+
+
+async def _error_message(resp: aiohttp.ClientResponse) -> str:
+    """Fehlertext von Brevo auslesen (JSON ``message`` oder Rohtext)."""
+    try:
+        body = await resp.text()
+    except aiohttp.ClientError:
+        return ""
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return body.strip()[:300]
+    if isinstance(data, dict):
+        return str(data.get("message") or data.get("code") or "").strip()
+    return ""
+
+
 def _float(value: Any) -> float | None:
     try:
         return float(value)
@@ -176,7 +215,10 @@ class BrevoClient:
                 f"{API_BASE}{path}", params=params, headers=headers, timeout=self._timeout
             ) as resp:
                 if resp.status in (401, 403):
-                    raise BrevoAuthError("API-Schlüssel ungültig oder ohne Berechtigung")
+                    message = await _error_message(resp)
+                    if _is_ip_block(message):
+                        raise BrevoIpNotAuthorizedError(message)
+                    raise BrevoAuthError(message or "API-Schlüssel ungültig oder ohne Berechtigung")
                 if resp.status == 429:
                     raise BrevoRateLimitError("Brevo-Ratelimit erreicht")
                 if resp.status >= 400:

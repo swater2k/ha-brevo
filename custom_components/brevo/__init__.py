@@ -29,11 +29,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: BrevoConfigEntry) -> boo
     coordinator = BrevoCoordinator(
         hass, entry, client, entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     )
-    await coordinator.async_config_entry_first_refresh()
+    from .issues import async_update_issues
+
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    finally:
+        # Auch bei ConfigEntryNotReady: den IP-Hinweis sofort zeigen, statt
+        # still in setup_retry zu hängen.
+        async_update_issues(hass, entry, coordinator)
 
     entry.runtime_data = BrevoRuntimeData(coordinator)
-
-    from .issues import async_update_issues
 
     @callback
     def _update_issues() -> None:
@@ -52,3 +57,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: BrevoConfigEntry) -> bo
     if unloaded := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         async_remove_issues(hass, entry)
     return unloaded
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: BrevoConfigEntry) -> None:
+    """Hinweise auch dann entfernen, wenn der Eintrag nie geladen war."""
+    from .issues import async_remove_issues
+
+    async_remove_issues(hass, entry)

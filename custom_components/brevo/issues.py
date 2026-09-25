@@ -11,7 +11,8 @@ from .coordinator import BrevoCoordinator
 
 ISSUE_CREDITS_LOW = "credits_low"
 ISSUE_DELIVERY_PROBLEMS = "delivery_problems"
-ALL_ISSUES = (ISSUE_CREDITS_LOW, ISSUE_DELIVERY_PROBLEMS)
+ISSUE_IP_NOT_AUTHORIZED = "ip_not_authorized"
+ALL_ISSUES = (ISSUE_CREDITS_LOW, ISSUE_DELIVERY_PROBLEMS, ISSUE_IP_NOT_AUTHORIZED)
 
 
 def _issue_id(entry: ConfigEntry, key: str) -> str:
@@ -46,6 +47,17 @@ def _set(
 def async_update_issues(
     hass: HomeAssistant, entry: ConfigEntry, coordinator: BrevoCoordinator
 ) -> None:
+    # Vor der Frühausstiegsprüfung: dieser Hinweis gilt gerade dann, wenn der
+    # Abruf fehlschlägt.
+    _set(
+        hass,
+        entry,
+        ISSUE_IP_NOT_AUTHORIZED,
+        coordinator.ip_block is not None,
+        ir.IssueSeverity.ERROR,
+        {"message": coordinator.ip_block or ""},
+    )
+
     data = coordinator.data
     if data is None or not coordinator.last_update_success:
         return

@@ -25,7 +25,14 @@ from homeassistant.helpers.selector import (
 )
 import voluptuous as vol
 
-from .api import Account, BrevoAuthError, BrevoClient, BrevoConnectionError, BrevoError
+from .api import (
+    Account,
+    BrevoAuthError,
+    BrevoClient,
+    BrevoConnectionError,
+    BrevoError,
+    BrevoIpNotAuthorizedError,
+)
 from .const import (
     CONF_CREDITS_THRESHOLD,
     CONF_SCAN_INTERVAL,
@@ -52,6 +59,8 @@ async def validate_key(hass: HomeAssistant, api_key: str) -> tuple[Account | Non
     client = BrevoClient(async_get_clientsession(hass), api_key)
     try:
         return await client.account(), None
+    except BrevoIpNotAuthorizedError:
+        return None, "ip_not_authorized"
     except BrevoAuthError:
         return None, "invalid_auth"
     except BrevoConnectionError:
